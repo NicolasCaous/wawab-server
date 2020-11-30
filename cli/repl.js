@@ -11,6 +11,7 @@ require("dotenv").config({
 });
 
 global.slonik = require("slonik");
+global.sql = slonik.sql;
 global.pool = slonik.createPool(dbConfig.DB_CONN_STRING, {
   maximumPoolSize: dbConfig.DB_MAX_POOL,
 });
