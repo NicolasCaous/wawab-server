@@ -6,7 +6,6 @@ const joinSqlTemplates = rfr("src/utils/slonik/join_sql_templates");
 const { sql } = require("slonik");
 
 class SlormModel {
-  static columns;
   static tableName;
 
   static validateModel(cls) {
@@ -93,5 +92,29 @@ class SlormModel {
     await trx.query(sql`DROP TABLE ${sql.identifier(cls.tableName)}`);
   }
 }
+
+/*
+const nameIt = (name, cls) => ({[name] : class extends cls {}})[name];
+
+class Dummy {};
+
+const NamedDummy = nameIt('NamedDummy', Dummy);
+const NamedDummyMore = nameIt('NamedDummyMore', class {});
+
+console.log('Here are the classes:');
+console.log(Dummy);
+console.log(NamedDummy);
+console.log(NamedDummyMore);
+
+const dummy = new Dummy();
+const namedDummy = new NamedDummy();
+const namedDummyMore = new NamedDummyMore();
+
+
+console.log('\nHere are the objects:');
+console.log(dummy);
+console.log(namedDummy);
+console.log(namedDummyMore);
+*/
 
 module.exports = SlormModel;

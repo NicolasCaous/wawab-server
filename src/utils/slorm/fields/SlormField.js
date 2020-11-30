@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { sql } = require("slonik");
+
 class SlormField {
   constructor(args) {
     assert(typeof args === "object", "args must be an object");
@@ -78,6 +81,16 @@ class SlormField {
         this.sqlType.type === "SLONIK_TOKEN_SQL",
       "Slorm fields must have a sqlType attribute that is a slonik sql template"
     );
+  }
+
+  toSQL(columnName) {
+    if (this.columnName !== undefined) columnName = this.columnName;
+
+    return sql`${columnName} ${this.sqlType}${
+      this.primaryKey ? sql` PRIMARY KEY` : sql``
+    }${this.notNull ? sql` NOT NULL` : sql``}${
+      this.unique ? sql` UNIQUE` : sql``
+    }`;
   }
 }
 

@@ -23,3 +23,17 @@ fs.readdirSync(`${appRoot}/src/db/models`).forEach((file) => {
     global[cls.name] = cls;
   }
 });
+
+fs.readdirSync(`${appRoot}/src/utils/slorm/fields`).forEach((file) => {
+  if (file.endsWith(".js")) {
+    let cls = rfr(`/src/utils/slorm/fields/${file}`);
+    global[cls.name] = cls;
+  }
+});
+
+fs.readdirSync(`${appRoot}/src/utils/slorm`).forEach((file) => {
+  if (file.endsWith(".js")) {
+    let cls = rfr(`/src/utils/slorm/${file}`);
+    global[cls.name] = cls;
+  }
+});
