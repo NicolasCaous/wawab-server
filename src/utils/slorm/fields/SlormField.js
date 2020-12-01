@@ -118,6 +118,24 @@ class SlormField {
       "unique must be a boolean or an slonik sql template"
     );
 
+    this.uniqueDeferrable =
+      "uniqueDeferrable" in args ? args.uniqueDeferrable : undefined;
+    if (this.uniqueDeferrable !== undefined)
+      assert(
+        typeof this.uniqueDeferrable === "boolean",
+        "uniqueDeferrable must be a boolean"
+      );
+
+    this.uniqueDeferrableImmediate =
+      "uniqueDeferrableImmediate" in args
+        ? args.uniqueDeferrableImmediate
+        : undefined;
+    if (this.uniqueDeferrableImmediate !== undefined)
+      assert(
+        typeof this.uniqueDeferrableImmediate === "boolean",
+        "uniqueDeferrableImmediate must be a boolean"
+      );
+
     this.primaryKey = "primaryKey" in args ? args.primaryKey : false;
     assert(
       typeof this.primaryKey === "boolean" ||
@@ -126,6 +144,104 @@ class SlormField {
           this.primaryKey.type === "SLONIK_TOKEN_SQL"),
       "primaryKey must be a boolean or an slonik sql template"
     );
+
+    this.primaryKeyDeferrable =
+      "primaryKeyDeferrable" in args ? args.primaryKeyDeferrable : undefined;
+    if (this.primaryKeyDeferrable !== undefined)
+      assert(
+        typeof this.primaryKeyDeferrable === "boolean",
+        "primaryKeyDeferrable must be a boolean"
+      );
+
+    this.primaryKeyDeferrableImmediate =
+      "primaryKeyDeferrableImmediate" in args
+        ? args.primaryKeyDeferrableImmediate
+        : undefined;
+    if (this.primaryKeyDeferrableImmediate !== undefined)
+      assert(
+        typeof this.primaryKeyDeferrableImmediate === "boolean",
+        "primaryKeyDeferrableImmediate must be a boolean"
+      );
+
+    this.refTable = "refTable" in args ? args.refTable : undefined;
+    if (this.refTable !== undefined)
+      assert(
+        typeof this.refTable === "object" &&
+          "type" in this.refTable &&
+          this.refTable.type === "SLONIK_TOKEN_SQL",
+        "refTable must be a slonik sql template"
+      );
+
+    this.refColumn = "refColumn" in args ? args.refColumn : undefined;
+    if (this.refColumn !== undefined)
+      assert(
+        typeof this.refColumn === "object" &&
+          "type" in this.refColumn &&
+          this.refColumn.type === "SLONIK_TOKEN_SQL",
+        "refColumn must be a slonik sql template"
+      );
+
+    this.refMatch = "refMatch" in args ? args.refMatch : undefined;
+    if (this.refMatch !== undefined)
+      assert(
+        typeof this.refMatch === "object" &&
+          "type" in this.refMatch &&
+          this.refMatch.type === "SLONIK_TOKEN_SQL" &&
+          ["MATCH FULL", "MATCH PARTIAL", "MATCH SIMPLE"].includes(
+            this.refMatch.sql
+          ),
+        "refMatch must be a slonik sql template and can only be 'MATCH FULL', 'MATCH PARTIAL', 'MATCH SIMPLE'"
+      );
+
+    this.refOnDelete = "refOnDelete" in args ? args.refOnDelete : undefined;
+    if (this.refOnDelete !== undefined)
+      assert(
+        typeof this.refOnDelete === "object" &&
+          "type" in this.refOnDelete &&
+          this.refOnDelete.type === "SLONIK_TOKEN_SQL" &&
+          [
+            "NO ACTION",
+            "RESTRICT",
+            "CASCADE",
+            "SET NULL",
+            "SET DEFAULT",
+          ].includes(this.refOnDelete.sql),
+        "refOnDelete must be a slonik sql template and can only be 'NO ACTION', 'RESTRICT', 'CASCADE', 'SET NULL', 'SET DEFAULT'"
+      );
+
+    this.refOnUpdate = "refOnUpdate" in args ? args.refOnUpdate : undefined;
+    if (this.refOnUpdate !== undefined)
+      assert(
+        typeof this.refOnUpdate === "object" &&
+          "type" in this.refOnUpdate &&
+          this.refOnUpdate.type === "SLONIK_TOKEN_SQL" &&
+          [
+            "NO ACTION",
+            "RESTRICT",
+            "CASCADE",
+            "SET NULL",
+            "SET DEFAULT",
+          ].includes(this.refOnUpdate.sql),
+        "refOnUpdate must be a slonik sql template and can only be 'NO ACTION', 'RESTRICT', 'CASCADE', 'SET NULL', 'SET DEFAULT'"
+      );
+
+    this.refDeferrable =
+      "refDeferrable" in args ? args.refDeferrable : undefined;
+    if (this.refDeferrable !== undefined)
+      assert(
+        typeof this.refDeferrable === "boolean",
+        "refDeferrable must be a boolean"
+      );
+
+    this.refDeferrableImmediate =
+      "refDeferrableImmediate" in args
+        ? args.refDeferrableImmediate
+        : undefined;
+    if (this.refDeferrableImmediate !== undefined)
+      assert(
+        typeof this.refDeferrableImmediate === "boolean",
+        "refDeferrableImmediate must be a boolean"
+      );
   }
 
   /*
@@ -160,6 +276,9 @@ class SlormField {
   CASCADE
   SET NULL
   SET DEFAULT
+
+  only UNIQUE, PRIMARY KEY, and REFERENCES constraints are deferrable
+  only UNIQUE, PRIMARY KEY, and REFERENCES can be INITIALLY DEFERRED or INITIALLY IMMEDIATE
   */
   toSQL(columnName) {
     if (this.columnName !== undefined) columnName = this.columnName;
@@ -218,6 +337,24 @@ class SlormField {
                       ? sql`${this.unique}`
                       : sql``
                   }`,
+                  sql`${
+                    this.uniqueDeferrable !== undefined
+                      ? sql`${
+                          this.uniqueDeferrable
+                            ? sql`DEFERRABLE`
+                            : sql`NOT DEFERRABLE`
+                        }`
+                      : sql``
+                  }`,
+                  sql`${
+                    this.uniqueDeferrableImmediate !== undefined
+                      ? sql`${
+                          this.uniqueDeferrableImmediate
+                            ? sql`INITIALLY IMMEDIATE`
+                            : sql`INITIALLY DEFERRED`
+                        }`
+                      : sql``
+                  }`,
                 ],
                 sql` `
               )
@@ -231,6 +368,70 @@ class SlormField {
                   sql`${
                     typeof this.primaryKey === "object"
                       ? sql`${this.primaryKey}`
+                      : sql``
+                  }`,
+                  sql`${
+                    this.primaryKeyDeferrable !== undefined
+                      ? sql`${
+                          this.primaryKeyDeferrable
+                            ? sql`DEFERRABLE`
+                            : sql`NOT DEFERRABLE`
+                        }`
+                      : sql``
+                  }`,
+                  sql`${
+                    this.primaryKeyDeferrableImmediate !== undefined
+                      ? sql`${
+                          this.primaryKeyDeferrableImmediate
+                            ? sql`INITIALLY IMMEDIATE`
+                            : sql`INITIALLY DEFERRED`
+                        }`
+                      : sql``
+                  }`,
+                ],
+                sql` `
+              )
+            : sql``
+        }`,
+        sql`${
+          this.refTable !== undefined
+            ? joinSqlTemplates(
+                [
+                  sql`REFERENCES ${this.refTable}`,
+                  sql`${
+                    this.refColumn !== undefined
+                      ? sql`( ${this.refColumn} )`
+                      : sql``
+                  }`,
+                  sql`${
+                    this.refMatch !== undefined ? sql`${this.refMatch}` : sql``
+                  }`,
+                  sql`${
+                    this.refOnDelete !== undefined
+                      ? sql`ON DELETE ${this.refOnDelete}`
+                      : sql``
+                  }`,
+                  sql`${
+                    this.refOnUpdate !== undefined
+                      ? sql`ON UPDATE ${this.refOnUpdate}`
+                      : sql``
+                  }`,
+                  sql`${
+                    this.refDeferrable !== undefined
+                      ? sql`${
+                          this.refDeferrable
+                            ? sql`DEFERRABLE`
+                            : sql`NOT DEFERRABLE`
+                        }`
+                      : sql``
+                  }`,
+                  sql`${
+                    this.refDeferrableImmediate !== undefined
+                      ? sql`${
+                          this.refDeferrableImmediate
+                            ? sql`INITIALLY IMMEDIATE`
+                            : sql`INITIALLY DEFERRED`
+                        }`
                       : sql``
                   }`,
                 ],
