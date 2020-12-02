@@ -15,12 +15,24 @@ global.sql = slonik.sql;
 global.pool = slonik.createPool(dbConfig.DB_CONN_STRING, {
   maximumPoolSize: dbConfig.DB_MAX_POOL,
 });
+global.startTransaction = rfr("src/utils/slonik/transaction").startTransaction;
+global.SERIALIZABLE = rfr("src/utils/slonik/transaction").SERIALIZABLE;
+global.REPEATABLE_READ = rfr("src/utils/slonik/transaction").REPEATABLE_READ;
+global.READ_COMMITTED = rfr("src/utils/slonik/transaction").READ_COMMITTED;
+global.READ_UNCOMMITTED = rfr("src/utils/slonik/transaction").READ_UNCOMMITTED;
 
 global.fs = require("fs");
 
 fs.readdirSync(`${appRoot}/src/db/models`).forEach((file) => {
   if (file.endsWith(".js")) {
     let cls = rfr(`src/db/models/${file}`);
+    global[cls.name] = cls;
+  }
+});
+
+fs.readdirSync(`${appRoot}/src/utils/slorm/constraints`).forEach((file) => {
+  if (file.endsWith(".js")) {
+    let cls = rfr(`/src/utils/slorm/constraints/${file}`);
     global[cls.name] = cls;
   }
 });

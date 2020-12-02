@@ -37,6 +37,16 @@ class SlormField {
         "collation must be a slonik sql template"
       );
 
+    this.constraintName =
+      "constraintName" in args ? args.constraintName : undefined;
+    if (this.constraintName !== undefined)
+      assert(
+        typeof this.constraintName === "object" &&
+          "type" in this.constraintName &&
+          this.constraintName.type === "SLONIK_TOKEN_SQL",
+        "constraintName must be a slonik sql template and must not be undefined"
+      );
+
     this.null = "null" in args ? args.null : false;
     assert(typeof this.null === "boolean", "null must be a boolean");
 
@@ -115,7 +125,7 @@ class SlormField {
         (typeof this.unique === "object" &&
           "type" in this.unique &&
           this.unique.type === "SLONIK_TOKEN_SQL"),
-      "unique must be a boolean or an slonik sql template"
+      "unique must be a boolean or a slonik sql template"
     );
 
     this.uniqueDeferrable =
@@ -142,7 +152,7 @@ class SlormField {
         (typeof this.primaryKey === "object" &&
           "type" in this.primaryKey &&
           this.primaryKey.type === "SLONIK_TOKEN_SQL"),
-      "primaryKey must be a boolean or an slonik sql template"
+      "primaryKey must be a boolean or a slonik sql template"
     );
 
     this.primaryKeyDeferrable =
@@ -289,6 +299,11 @@ class SlormField {
         sql`${this.sqlType}`,
         sql`${
           this.collation !== undefined ? sql`COLLATE ${this.collation}` : sql``
+        }`,
+        sql`${
+          this.constraintName !== undefined
+            ? sql`CONSTRAINT ${this.constraintName}`
+            : sql``
         }`,
         sql`${this.null ? sql`NULL` : sql`NOT NULL`}`,
         sql`${

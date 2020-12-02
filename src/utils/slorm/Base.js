@@ -2,94 +2,55 @@
 const rfr = require("rfr");
 
 const joinSqlTemplates = rfr("src/utils/slonik/join_sql_templates");
+const SlormConstraint = rfr("src/utils/slorm/constraints/SlormConstraint");
+const SlormField = rfr("src/utils/slorm/fields/SlormField");
 
 const { sql } = require("slonik");
 
 class SlormModel {
   static tableName;
 
-  static validateModel(cls) {
+  static getTableName() {
+    let tableName = this.tableName;
+    if (tableName === undefined)
+      tableName = sql`${sql.identifier([this.name])}`;
+
     assert(
-      typeof cls.tableName === "string" && cls.tableName.length > 3,
-      `static tableName "${cls.tableName}" must be a string with length > 3`
+      typeof tableName === "object" &&
+        "type" in tableName &&
+        tableName.type === "SLONIK_TOKEN_SQL",
+      "tableName must be a slonik sql template"
     );
-
-    for (let name in cls.columns) {
-      assert("type" in cls.columns[name]);
-
-      if ("primaryKey" in cls.columns[name])
-        assert(typeof cls.columns[name].primaryKey === "boolean");
-
-      if ("null" in cls.columns[name])
-        assert(typeof cls.columns[name].null === "boolean");
-
-      if ("unique" in cls.columns[name])
-        assert(typeof cls.columns[name].unique === "boolean");
+    if (tableName.sql[0] !== '"' || tableName.sql.substr(-1) !== '"') {
+      tableName = sql`${sql.identifier([tableName.sql])}`;
     }
+
+    return tableName;
   }
 
-  static async startTransaction(cls, slonik, handler) {
-    await slonik.connect(
-      async (conn) =>
-        await conn.transaction(async (trx) => {
-          await trx.query(sql`SET TRANSACTION ISOLATION LEVEL SERIALIZABLE`);
-          await handler(cls, trx);
-        })
-    );
-  }
-
-  static async createTable(cls, trx) {
-    cls.validateModel(cls);
-
-    let queryLines = [];
+  static toSQL() {
+    let columns = [];
     let constraints = [];
-    let primaryKeys = [];
 
-    for (let name in cls.columns) {
-      let queryColumn = sql`${sql.identifier([name.trim()])}`;
-      queryColumn = sql`${queryColumn} ${cls.columns[name].type}`;
+    for (let attr in this)
+      if (this[attr] instanceof SlormField) columns.push(attr);
+      else if (this[attr] instanceof SlormConstraint) constraints.push(attr);
 
-      if (
-        "primaryKey" in cls.columns[name] &&
-        cls.columns[name].primaryKey === true
-      )
-        primaryKeys.push(
-          sql`${sql.identifier([cls.columns[name].name.trim()])}`
-        );
-
-      if ("null" in cls.columns[name] && cls.columns[name].null === false)
-        queryColumn = sql`${queryColumn} NOT NULL`;
-
-      if ("unique" in cls.columns[name] && cls.columns[name].unique === true)
-        queryColumn = sql`${queryColumn} UNIQUE`;
-
-      queryLines.push(queryColumn);
-    }
-
-    if (primaryKeys.length > 0)
-      constraints.push(
-        sql`CONSTRAINT primary_key PRIMARY KEY (${joinSqlTemplates(
-          primaryKeys,
-          sql`, `
-        )})`
-      );
-
-    queryLines = joinSqlTemplates(queryLines.concat(constraints), sql`, `);
-
-    console.log(
-      sql`CREATE TABLE ${sql.identifier([
-        cls.tableName.trim(),
-      ])} (${queryLines})`
+    columns = joinSqlTemplates(
+      columns.map((attr) => this[attr].toSQL(sql`${sql.identifier([attr])}`)),
+      sql`, `
     );
-    await trx.query(
-      sql`CREATE TABLE ${sql.identifier([
-        cls.tableName.trim(),
-      ])} (${queryLines})`
+    constraints = joinSqlTemplates(
+      constraints.map((attr) =>
+        this[attr].toSQL(sql`${sql.identifier([attr])}`)
+      ),
+      sql`, `
     );
-  }
 
-  static async dropTable(cls, trx) {
-    await trx.query(sql`DROP TABLE ${sql.identifier(cls.tableName)}`);
+    return sql`CREATE TABLE ${this.getTableName()} ( ${joinSqlTemplates(
+      [columns, constraints],
+      sql`, `
+    )} )`;
   }
 }
 

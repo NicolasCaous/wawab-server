@@ -1,7 +1,7 @@
 "use strict";
 
 const { sql } = require("slonik");
-const SlormField = require("./SlormField");
+const SlormField = rfr("src/utils/slorm/fields/SlormField");
 
 class VarCharField extends SlormField {
   constructor(args) {
