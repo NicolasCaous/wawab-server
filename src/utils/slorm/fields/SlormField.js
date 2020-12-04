@@ -1,6 +1,7 @@
 "use strict";
 const rfr = require("rfr");
 
+const escape = rfr("src/utils/slonik/escape");
 const joinSqlTemplates = rfr("src/utils/slonik/join_sql_templates");
 
 const assert = require("assert");
@@ -11,13 +12,15 @@ class SlormField {
     assert(typeof args === "object", "args must be an object");
 
     this.columnName = "columnName" in args ? args.columnName : undefined;
-    if (this.columnName !== undefined)
+    if (this.columnName !== undefined) {
       assert(
         typeof this.columnName === "object" &&
           "type" in this.columnName &&
           this.columnName.type === "SLONIK_TOKEN_SQL",
         "columnName must be a slonik sql template and must not be undefined"
       );
+      this.columnName = escape(this.columnName);
+    }
 
     this.sqlType = "sqlType" in args ? args.sqlType : undefined;
     assert(
@@ -295,14 +298,14 @@ class SlormField {
 
     return joinSqlTemplates(
       [
-        sql`${columnName}`,
+        sql`${escape(columnName)}`,
         sql`${this.sqlType}`,
         sql`${
           this.collation !== undefined ? sql`COLLATE ${this.collation}` : sql``
         }`,
         sql`${
           this.constraintName !== undefined
-            ? sql`CONSTRAINT ${this.constraintName}`
+            ? sql`CONSTRAINT ${escape(this.constraintName)}`
             : sql``
         }`,
         sql`${this.null ? sql`NULL` : sql`NOT NULL`}`,
@@ -412,10 +415,10 @@ class SlormField {
           this.refTable !== undefined
             ? joinSqlTemplates(
                 [
-                  sql`REFERENCES ${this.refTable}`,
+                  sql`REFERENCES ${escape(this.refTable)}`,
                   sql`${
                     this.refColumn !== undefined
-                      ? sql`( ${this.refColumn} )`
+                      ? sql`( ${escape(this.refColumn)} )`
                       : sql``
                   }`,
                   sql`${
@@ -457,6 +460,14 @@ class SlormField {
       ],
       sql` `
     );
+  }
+
+  static fromDb(value) {
+    return value;
+  }
+
+  static toDb(value) {
+    return sql`${value}`;
   }
 }
 

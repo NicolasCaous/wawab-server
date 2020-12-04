@@ -10,6 +10,7 @@ require("dotenv").config({
     : `${appRoot}/.env`,
 });
 
+global.uuid = require("uuid");
 global.slonik = require("slonik");
 global.sql = slonik.sql;
 global.pool = slonik.createPool(dbConfig.DB_CONN_STRING, {
