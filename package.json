@@ -15,6 +15,7 @@
     "app-root-path": "^3.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "moment-timezone": "^0.5.32",
     "pg": "^8.5.1",
     "rfr": "^1.2.3",
     "roarr": "^2.15.4",

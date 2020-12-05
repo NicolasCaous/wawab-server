@@ -6,6 +6,7 @@ const uuid = require("uuid");
 const joinSqlTemplates = rfr("src/utils/slonik/join_sql_templates");
 const SlormField = rfr("src/utils/slorm/fields/SlormField");
 const SlormModel = rfr("src/utils/slorm/SlormModel");
+const TimestampField = rfr("src/utils/slorm/fields/TimestampField");
 const UUIDField = rfr("src/utils/slorm/fields/UUIDField");
 
 class BaseHistoricModel extends SlormModel {
@@ -16,7 +17,10 @@ class BaseHistoricModel extends SlormModel {
     primaryKey: true,
   });
 
-  async _save(trx) {
+  static updated_at = new TimestampField();
+  static created_at = new TimestampField();
+
+  async _save(trx, override) {
     let newRow = this.id === undefined;
 
     if (this.id !== undefined) {
@@ -26,7 +30,7 @@ class BaseHistoricModel extends SlormModel {
             sql`SELECT * FROM`,
             sql`${this.constructor.getTableName()}`,
             sql`WHERE "id" =`,
-            sql`${this.constructor.id.constructor.toDb(this.id)}`,
+            sql`${this.constructor.id.toDb(this.id)}`,
           ],
           sql` `
         )
@@ -37,7 +41,7 @@ class BaseHistoricModel extends SlormModel {
       if (!newRow) {
         this.#dbTruth = {};
         for (let attr in result.rows[0]) {
-          this.#dbTruth[attr] = this.constructor[attr].constructor.fromDb(
+          this.#dbTruth[attr] = this.constructor[attr].fromDb(
             result.rows[0][attr]
           );
         }
@@ -45,7 +49,21 @@ class BaseHistoricModel extends SlormModel {
     }
 
     if (newRow) {
-      let columns = [];
+      let columns = [
+        [
+          "updated_at",
+          sql`"updated_at"`,
+          new Date(),
+          (x) => this.constructor.updated_at.toDb(x),
+        ],
+        [
+          "created_at",
+          sql`"created_at"`,
+          new Date(),
+          (x) => this.constructor.created_at.toDb(x),
+        ],
+      ];
+
       for (let attr in this.constructor) {
         if (this.constructor[attr] instanceof SlormField) {
           let value = this[attr];
@@ -64,8 +82,29 @@ class BaseHistoricModel extends SlormModel {
                 ? this.constructor[attr].columnName
                 : sql`${sql.identifier([attr])}`,
               value,
-              this.constructor[attr].constructor.toDb,
+              (x) => this.constructor[attr].toDb(x),
             ]);
+        }
+      }
+
+      if (
+        columns.filter((x) => x[0] === "updated_at" || x[0] === "created_at")
+          .length > 2
+      ) {
+        assert(
+          override === true,
+          "editing updated_at or created_at is forbidden without override flag"
+        );
+
+        let removeUpdatedAt =
+          columns.filter((x) => x[0] === "updated_at").length === 2;
+        let removeCreatedAt =
+          columns.filter((x) => x[0] === "created_at").length === 2;
+
+        if (removeUpdatedAt && removeCreatedAt) columns.splice(0, 2);
+        else {
+          if (removeUpdatedAt) columns.splice(0, 1);
+          if (removeCreatedAt) columns.splice(1, 1);
         }
       }
 
@@ -91,36 +130,52 @@ class BaseHistoricModel extends SlormModel {
       for (let i in columns) {
         let attr = columns[i][0];
         let value = columns[i][2];
-        if (
-          this[attr] === undefined &&
-          typeof this.constructor[attr].default === "function"
-        ) {
-          this[attr] = value;
-        }
+        this[attr] = value;
       }
 
       return true;
     } else {
-      let columns = [];
+      let columns = [
+        [
+          "updated_at",
+          sql`"updated_at"`,
+          new Date(),
+          (x) => this.constructor.updated_at.toDb(x),
+        ],
+      ];
+
       for (let attr in this.constructor) {
         if (this.constructor[attr] instanceof SlormField) {
           let value = this[attr];
           value = value === undefined ? null : value;
 
-          if (value !== this.#dbTruth[attr]) {
+          if (this.constructor[attr].isDifferent(value, this.#dbTruth[attr])) {
             columns.push([
               attr,
               this.constructor[attr].columnName !== undefined
                 ? this.constructor[attr].columnName
                 : sql`${sql.identifier([attr])}`,
               value,
-              this.constructor[attr].constructor.toDb,
+              (x) => this.constructor[attr].toDb(x),
             ]);
           }
         }
       }
 
-      if (columns.length === 0) return false;
+      if (columns.length === 1) return false;
+
+      if (
+        columns.filter((x) => x[0] === "updated_at" || x[0] === "created_at")
+          .length > 1
+      ) {
+        assert(
+          override === true,
+          "editing updated_at or created_at is forbidden without override flag"
+        );
+
+        if (columns.filter((x) => x[0] === "updated_at").length === 2)
+          columns.splice(0, 1);
+      }
 
       await trx.query(
         joinSqlTemplates(
@@ -131,26 +186,17 @@ class BaseHistoricModel extends SlormModel {
               sql`, `
             ),
             sql`WHERE "id" =`,
-            sql`${this.constructor.id.constructor.toDb(this.id)}`,
+            sql`${this.constructor.id.toDb(this.id)}`,
           ],
           sql` `
         )
       );
 
+      this.updated_at = columns[0][2];
+
       return true;
     }
   }
-
-  /*{
-    command: 'SELECT',
-    fields: [ { dataTypeId: 2950, name: 'id' } ],
-    notices: [],
-    rowCount: 2,
-    rows: [
-      { id: '23aaf121-b80b-48ba-aec8-66a3a320e9b8' },
-      { id: '2e154826-b66d-4b18-a7fe-697fb51dd12d' }
-    ]
-  }*/
 }
 
 /*

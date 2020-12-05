@@ -462,12 +462,16 @@ class SlormField {
     );
   }
 
-  static fromDb(value) {
+  fromDb(value) {
     return value;
   }
 
-  static toDb(value) {
+  toDb(value) {
     return sql`${value}`;
+  }
+
+  isDifferent(a, b) {
+    return a !== b;
   }
 }
 
