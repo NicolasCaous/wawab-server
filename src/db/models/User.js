@@ -3,10 +3,10 @@ const rfr = require("rfr");
 
 const { sql } = require("slonik");
 
-const BaseHistoricModel = rfr("src/db/models/base");
+const BaseModel = rfr("src/db/models/Base");
 const VarCharField = rfr("src/utils/slorm/fields/VarCharField");
 
-class UserModel extends BaseHistoricModel {
+class UserModel extends BaseModel {
   static tableName = sql`user`;
 
   static uname = new VarCharField({ null: true });
