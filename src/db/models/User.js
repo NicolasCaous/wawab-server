@@ -10,6 +10,9 @@ class UserModel extends BaseModel {
   static tableName = sql`user`;
 
   static uname = new VarCharField({ null: true });
+  static sexo = new VarCharField({ null: true });
 }
+
+UserModel.setUpHistory();
 
 module.exports = UserModel;

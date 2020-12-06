@@ -473,6 +473,19 @@ class SlormField {
   isDifferent(a, b) {
     return a !== b;
   }
+
+  toHistory() {
+    return new this.constructor({
+      ...this,
+      check: undefined,
+      default: undefined,
+      generatedStored: undefined,
+      generatedAsIdentity: undefined,
+      unique: false,
+      primaryKey: false,
+      refTable: undefined,
+    });
+  }
 }
 
 module.exports = SlormField;
