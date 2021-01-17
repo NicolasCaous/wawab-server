@@ -16,11 +16,11 @@ global.sql = slonik.sql;
 global.pool = slonik.createPool(dbConfig.DB_CONN_STRING, {
   maximumPoolSize: dbConfig.DB_MAX_POOL,
 });
-global.startTransaction = rfr("src/utils/slonik/transaction").startTransaction;
-global.SERIALIZABLE = rfr("src/utils/slonik/transaction").SERIALIZABLE;
-global.REPEATABLE_READ = rfr("src/utils/slonik/transaction").REPEATABLE_READ;
-global.READ_COMMITTED = rfr("src/utils/slonik/transaction").READ_COMMITTED;
-global.READ_UNCOMMITTED = rfr("src/utils/slonik/transaction").READ_UNCOMMITTED;
+global.startTransaction = require("@slorm/slorm").transaction.startTransaction;
+global.SERIALIZABLE = require("@slorm/slorm").transaction.SERIALIZABLE;
+global.REPEATABLE_READ = require("@slorm/slorm").transaction.REPEATABLE_READ;
+global.READ_COMMITTED = require("@slorm/slorm").transaction.READ_COMMITTED;
+global.READ_UNCOMMITTED = require("@slorm/slorm").transaction.READ_UNCOMMITTED;
 
 global.fs = require("fs");
 
@@ -31,23 +31,19 @@ fs.readdirSync(`${appRoot}/src/db/models`).forEach((file) => {
   }
 });
 
-fs.readdirSync(`${appRoot}/src/utils/slorm/constraints`).forEach((file) => {
-  if (file.endsWith(".js")) {
-    let cls = rfr(`/src/utils/slorm/constraints/${file}`);
-    global[cls.name] = cls;
-  }
-});
+global.SlormConstraint = require("@slorm/slorm").SlormConstraint;
+global.SlormField = require("@slorm/slorm").SlormField;
 
-fs.readdirSync(`${appRoot}/src/utils/slorm/fields`).forEach((file) => {
-  if (file.endsWith(".js")) {
-    let cls = rfr(`/src/utils/slorm/fields/${file}`);
-    global[cls.name] = cls;
-  }
-});
+for (let attr in require("@slorm/slorm")) {
+  let exported = require("@slorm/slorm")[attr];
 
-fs.readdirSync(`${appRoot}/src/utils/slorm`).forEach((file) => {
-  if (file.endsWith(".js")) {
-    let cls = rfr(`/src/utils/slorm/${file}`);
-    global[cls.name] = cls;
-  }
-});
+  if (
+    exported.prototype instanceof global.SlormConstraint ||
+    exported.prototype instanceof global.SlormField
+  )
+    global[attr] = require("@slorm/slorm")[attr];
+}
+
+global.escape = require("@slorm/slorm").escape;
+global.joinSQLTemplates = require("@slorm/slorm").joinSQLTemplates;
+global.transaction = require("@slorm/slorm").transaction;

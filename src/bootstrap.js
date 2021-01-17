@@ -1,6 +1,7 @@
 "use strict";
 const rfr = require("rfr");
 
+const auth0Config = rfr("src/config/auth0");
 const bootstrapConfig = rfr("src/config/bootstrap");
 const dbConfig = rfr("src/config/db");
 const serverConfig = rfr("src/config/server");
@@ -15,7 +16,11 @@ const slonik = require("slonik");
 module.exports = async () => {
   logger.info("Bootstraping...");
 
-  const ctx = {};
+  const ctx = {
+    auth0: {
+      ...auth0Config,
+    },
+  };
 
   await setUpDatabase(ctx);
 
@@ -85,6 +90,9 @@ async function runMigrations(ctx) {
 async function setUpRoutes(ctx, app) {
   if (bootstrapConfig.SETUP_ROUTES) {
     logger.debug("Setting up routes...");
+
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
 
     try {
       await router(ctx, app);

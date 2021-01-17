@@ -1,7 +1,6 @@
 "use strict";
-const rfr = require("rfr");
 
-const HistoricScaffoldModel = rfr("src/utils/slorm/HistoricScaffoldModel");
+const { HistoricScaffoldModel } = require("@slorm/slorm");
 
 class BaseModel extends HistoricScaffoldModel {}
 
