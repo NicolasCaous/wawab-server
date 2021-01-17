@@ -2,6 +2,7 @@
 const rfr = require("rfr");
 
 const auth0Middleware = rfr("src/middlewares/auth0");
+const auth0EmailFetcher = rfr("src/middlewares/auth0EmailFetcher");
 const auth0ScopesMiddleware = rfr("src/middlewares/auth0Scopes");
 const fastValidateMiddleware = rfr("src/middlewares/fast_validate");
 const validateMiddleware = rfr("src/middlewares/validate");
@@ -12,6 +13,7 @@ module.exports = async (ctx, app) => {
   const middlewares = [
     auth0Middleware,
     auth0ScopesMiddleware,
+    auth0EmailFetcher,
     fastValidateMiddleware,
     validateMiddleware,
   ];
