@@ -20,6 +20,7 @@ const slonik = createPool(dbConfig.DB_CONN_STRING, {
 
 const migrator = setupSlonikMigrator({
   migrationsPath: dbConfig.DB_MIGRATIONS_PATH,
+  migrationTableName: "_migrations_metadata",
   slonik,
   mainModule: module,
 });

@@ -1,0 +1,1 @@
+node .\cli\migrate.js $Args

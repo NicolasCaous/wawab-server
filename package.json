@@ -21,6 +21,7 @@
     "express-jwt-authz": "^2.4.1",
     "jwks-rsa": "^1.12.2",
     "moment-timezone": "^0.5.32",
+    "node-fetch": "^2.6.1",
     "pg": "^8.5.1",
     "rfr": "^1.2.3",
     "roarr": "^2.15.4",

@@ -1,1 +1,0 @@
-knex --knexfile src/config/db.js seed:make $Args[0]

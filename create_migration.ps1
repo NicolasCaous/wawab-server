@@ -1,1 +1,0 @@
-knex --migrations-directory ./src/db/migrations migrate:make $Args[0]
