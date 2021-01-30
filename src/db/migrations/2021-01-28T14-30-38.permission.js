@@ -10,7 +10,13 @@ exports.up = async ({ slonik, sql }) =>
     await trx.query(PermissionModel.toSQL()[0]);
     await trx.query(PermissionModel.toSQL()[1]);
 
-    let permissions = ["/aff", "/oi"];
+    let permissions = [
+      "POST:/otp/send",
+      "POST:/otp/verify",
+      "DELETE:/user/token/:id",
+      "GET:/user/token",
+      "POST:/user/token",
+    ];
 
     let promises = [];
 

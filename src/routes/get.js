@@ -9,8 +9,8 @@ module.exports = (ctx) => {
     await next();
   };
 
-  handler.validate = async (req, res, next) => {
-    await next();
+  handler.validate = async (req, res, handler) => {
+    await handler(req, res);
   };
 
   return handler;

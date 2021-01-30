@@ -2,7 +2,7 @@
 
 module.exports = (ctx) => {
   const handler = async (req, res) => {
-    res.status(200).json(req.auth0data);
+    res.status(200).json(req.user);
   };
 
   handler.fastValidate = async (req, res, next) => {
@@ -10,9 +10,9 @@ module.exports = (ctx) => {
     await next();
   };
 
-  handler.validate = async (req, res, next) => {
+  handler.validate = async (req, res, handler) => {
     console.log("GET validator");
-    await next();
+    await handler(req, res);
   };
 
   return handler;

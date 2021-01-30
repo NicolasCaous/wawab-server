@@ -10,6 +10,6 @@ module.exports = (slonik) =>
   setupSlonikMigrator({
     migrationsPath: dbConfig.DB_MIGRATIONS_PATH,
     slonik,
-    migrationTableName: "slonik_migration",
+    migrationTableName: "_migrations_metadata",
     log: logger.info,
   });

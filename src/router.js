@@ -7,7 +7,9 @@ const auth0ScopesMiddleware = rfr("src/middlewares/auth0_scopes");
 const createUserMiddleware = rfr("src/middlewares/create_user");
 const fastValidateMiddleware = rfr("src/middlewares/fast_validate");
 const routePermission = rfr("src/middlewares/route_permission");
-const validateMiddleware = rfr("src/middlewares/validate");
+const validateAndExecuteMiddleware = rfr(
+  "src/middlewares/validate_and_execute"
+);
 
 const root = "src/routes";
 
@@ -18,30 +20,31 @@ module.exports = async (ctx, app) => {
     createUserMiddleware,
     routePermission,
     fastValidateMiddleware,
-    validateMiddleware,
+    validateAndExecuteMiddleware,
   ];
 
   const tokenMiddlewares = [
     apiTokenMiddleware,
     routePermission,
     fastValidateMiddleware,
-    validateMiddleware,
+    validateAndExecuteMiddleware,
   ];
 
   const setupRoute = (mid, route) => {
-    return [mid.map((m) => m(ctx, route(ctx))), route(ctx)];
+    route = route(ctx);
+    return mid.map((m) => m(ctx, route));
   };
 
   // prettier-ignore
   app.get("/", rfr(`${root}/get`)(ctx));
   // prettier-ignore
-  app.post("/otp/send", ...setupRoute(tokenMiddlewares, rfr(`${root}/otp/send/post`)));
+  app.post("/otp/send", setupRoute(tokenMiddlewares, rfr(`${root}/otp/send/post`)));
   // prettier-ignore
-  app.post("/otp/verify", ...setupRoute(tokenMiddlewares, rfr(`${root}/otp/verify/post`)));
+  app.post("/otp/verify", setupRoute(tokenMiddlewares, rfr(`${root}/otp/verify/post`)));
   // prettier-ignore
-  app.delete("/user/token/:token", ...setupRoute(standardMiddlewares, rfr(`${root}/user/token/_token/delete`)));
+  app.delete("/user/token/:id", setupRoute(standardMiddlewares, rfr(`${root}/user/token/$id/delete`)));
   // prettier-ignore
-  app.get("/user/token", ...setupRoute(standardMiddlewares, rfr(`${root}/user/token/get`)));
+  app.get("/user/token", setupRoute(standardMiddlewares, rfr(`${root}/user/token/get`)));
   // prettier-ignore
-  app.post("/user/token", ...setupRoute(standardMiddlewares, rfr(`${root}/user/token/post`)));
+  app.post("/user/token", setupRoute(standardMiddlewares, rfr(`${root}/user/token/post`)));
 };

@@ -1,22 +1,30 @@
 "use strict";
 const rfr = require("rfr");
 
+const apiTokenConfig = rfr("src/config/api_token");
 const auth0Config = rfr("src/config/auth0");
 const bootstrapConfig = rfr("src/config/bootstrap");
 const dbConfig = rfr("src/config/db");
 const serverConfig = rfr("src/config/server");
 
+const errorHandler = rfr("src/error");
 const logger = rfr("src/logger")(__filename);
 const router = rfr("src/router");
 
 const express = require("express");
 const { serializeError } = require("serialize-error");
 const slonik = require("slonik");
+const {
+  createQueryLoggingInterceptor,
+} = require("slonik-interceptor-query-logging");
 
 module.exports = async () => {
   logger.info("Bootstraping...");
 
   const ctx = {
+    apiToken: {
+      ...apiTokenConfig,
+    },
     auth0: {
       ...auth0Config,
     },
@@ -48,6 +56,7 @@ async function setUpDatabase(ctx) {
       ctx.db = {
         slonik: slonik.createPool(dbConfig.DB_CONN_STRING, {
           maximumPoolSize: dbConfig.DB_MAX_POOL,
+          interceptors: [createQueryLoggingInterceptor()],
         }),
       };
       logger.debug("Slonik pool created");
@@ -100,6 +109,8 @@ async function setUpRoutes(ctx, app) {
       logger.error(serializeError(error), "Router Error");
       process.exit(-1);
     }
+
+    errorHandler(app);
 
     logger.debug("Route setup finished");
   } else {

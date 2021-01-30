@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node src/server.js | roarr pretty-print",
+    "start": "nodemon src/server.js | roarr pretty-print",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -27,9 +27,13 @@
     "roarr": "^2.15.4",
     "serialize-error": "^7.0.1",
     "slonik": "^23.0.3",
+    "slonik-interceptor-query-logging": "^1.3.9",
     "uuid": "^8.3.1"
   },
   "optionalDependencies": {
     "pg-native": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
