@@ -14,8 +14,9 @@ module.exports = (ctx, handler) => async (req, res, next) => {
 
     await transaction.startTransaction(ctx.db.slonik, async (trx) => {
       req.auth0user = req.user;
-      req.user = await UserModel.getUserByAuth0Id(
+      req.user = await UserModel.getByColumn(
         trx,
+        "auth0_id",
         req.user.sub.split("|")[1]
       );
 
@@ -45,8 +46,14 @@ module.exports = (ctx, handler) => async (req, res, next) => {
 
         await new UserRoleModel({
           user: req.user.id,
-          role: (await RoleModel.getByLabel(trx, "standard")).id,
+          role: (await RoleModel.getByColumn(trx, "label", "standard")).id,
         })._save(trx);
+
+        req.userRoles = ["standard"];
+      } else {
+        req.userRoles = (await RoleModel.listByUser(trx, req.user.id)).map(
+          (x) => x.label
+        );
       }
 
       runNext = true;

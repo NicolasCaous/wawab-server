@@ -7,7 +7,13 @@ const PermissionModel = rfr("src/db/models/Permission");
 const RolePermissionModel = rfr("src/db/models/RolePermission");
 const RoleModel = rfr("src/db/models/Role");
 
-const paths = ["/oi"];
+const paths = [
+  "POST:/otp/send",
+  "POST:/otp/verify",
+  "DELETE:/user/token/:id",
+  "GET:/user/token",
+  "POST:/user/token",
+];
 
 exports.up = async ({ slonik, sql }) =>
   await transaction.startTransaction(slonik, async (trx) => {

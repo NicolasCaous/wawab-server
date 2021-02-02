@@ -8,6 +8,7 @@ const random = rfr("src/utils/random");
 
 const { transaction } = require("@slorm/slorm");
 
+// TODO: post for another user as admin
 module.exports = (ctx) => {
   const handler = async (req, res) => {
     let token = new Token({

@@ -66,7 +66,7 @@ const finishPasswordless = async (email, code) => {
       otp: code,
       realm: "email",
       audience: AUTH0_AUDIENCE,
-      scope: "openid profile email eco:standard",
+      scope: "openid profile email wawab:standard",
     }),
   })
     .then((res) => res.json())

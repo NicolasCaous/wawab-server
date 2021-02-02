@@ -24,15 +24,6 @@ class UserModel extends BaseModel {
     return new this(result.rows[0]);
   }
 
-  static async getUserByAuth0Id(trx, auth0_id) {
-    let result = await trx.query(sql`SELECT * FROM ${this.getTableName()}
-                                     WHERE auth0_id = ${auth0_id}`);
-
-    if (result.rowCount === 0) return undefined;
-
-    return new this(result.rows[0]);
-  }
-
   static async hasPermissionToUseRoute(trx, user_id, route) {
     return (
       (

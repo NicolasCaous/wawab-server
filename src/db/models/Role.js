@@ -11,13 +11,15 @@ class RoleModel extends BaseModel {
 
   static label = new VarCharField({ unique: true });
 
-  static async getByLabel(trx, label) {
-    let result = await trx.query(sql`SELECT * FROM ${this.getTableName()}
-                                     WHERE label = ${label}`);
+  static async listByUser(trx, user_id) {
+    let tokens = (
+      await trx.query(sql`SELECT r.* FROM ${this.getTableName()} r
+                            INNER JOIN "user_role" ur ON ur."role" = r."id"
+                            INNER JOIN "user" u ON ur."user" = u."id"
+                          WHERE u."id" = ${user_id}`)
+    ).rows;
 
-    if (result.rowCount === 0) return undefined;
-
-    return new this(result.rows[0]);
+    return tokens.map((x) => new this(x));
   }
 }
 
