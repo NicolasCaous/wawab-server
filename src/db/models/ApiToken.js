@@ -17,15 +17,6 @@ class ApiTokenModel extends BaseModel {
     unique: true,
   });
   static user = new ForeignKeyField({ table: UserModel, column: "id" });
-
-  static async howManyByUser(trx, user_id) {
-    return (
-      await trx.query(
-        sql`SELECT COUNT(*) FROM ${this.getTableName()}
-              WHERE "user" = ${user_id}`
-      )
-    ).rows[0].count;
-  }
 }
 
 ApiTokenModel.setUpHistory();

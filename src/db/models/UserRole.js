@@ -6,7 +6,7 @@ const RoleModel = rfr("src/db/models/Role");
 const UserModel = rfr("src/db/models/User");
 
 const { sql } = require("slonik");
-const { SlormConstraint, ForeignKeyField } = require("@slorm/slorm");
+const { ForeignKeyField, SlormConstraint } = require("@slorm/slorm");
 
 class UserRoleModel extends BaseModel {
   static tableName = sql`user_role`;

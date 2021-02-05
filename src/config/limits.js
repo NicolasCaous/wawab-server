@@ -9,5 +9,6 @@ require("dotenv").config({
 });
 
 module.exports = {
-  API_TOKEN_MAX_COUNT: parseInt(process.env.API_TOKEN_MAX_COUNT),
+  MAX_API_TOKENS_PER_USER: parseInt(process.env.MAX_API_TOKENS_PER_USER),
+  MAX_PHONES_PER_USER: parseInt(process.env.MAX_PHONES_PER_USER),
 };

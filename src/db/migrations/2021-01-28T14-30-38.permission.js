@@ -13,6 +13,8 @@ exports.up = async ({ slonik, sql }) =>
     let permissions = [
       "POST:/otp/send",
       "POST:/otp/verify",
+      "GET:/user/phone",
+      "POST:/user/phone",
       "DELETE:/user/token/:id",
       "GET:/user/token",
       "POST:/user/token",

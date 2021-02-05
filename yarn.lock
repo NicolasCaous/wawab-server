@@ -24,10 +24,10 @@
     lodash "^4.17.15"
     umzug "^2.3.0"
 
-"@slorm/slorm@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@slorm/slorm/-/slorm-0.0.6.tgz#72d54f242dca56a1a43aba38c8d2f5fc8eb316a4"
-  integrity sha512-DptMCJtPuLalaKavHfE9yf5Ggym/p03PYpMt1ZWTPydIiaFF5++qN7cUViC85kplDhm1vglyQv4fLtLoJpfoTA==
+"@slorm/slorm@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@slorm/slorm/-/slorm-0.0.7.tgz#811182c70aabbd261e985a786b27043bb671b057"
+  integrity sha512-4LR4Ma2hrzpmW0jUspEbubspwsuZls3BiOh2WLNxQMDLnuYdSd4Md2wO3TDi4A4es9AscpOib44RNwSJR1o+/w==
   dependencies:
     moment-timezone "^0.5.32"
     slonik "^23.1.0"

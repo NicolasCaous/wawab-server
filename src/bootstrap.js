@@ -1,7 +1,7 @@
 "use strict";
 const rfr = require("rfr");
 
-const apiTokenConfig = rfr("src/config/api_token");
+const limitsConfig = rfr("src/config/limits");
 const auth0Config = rfr("src/config/auth0");
 const bootstrapConfig = rfr("src/config/bootstrap");
 const dbConfig = rfr("src/config/db");
@@ -22,8 +22,8 @@ module.exports = async () => {
   logger.info("Bootstraping...");
 
   const ctx = {
-    apiToken: {
-      ...apiTokenConfig,
+    limits: {
+      ...limitsConfig,
     },
     auth0: {
       ...auth0Config,

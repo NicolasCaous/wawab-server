@@ -16,11 +16,12 @@ module.exports = (ctx) => {
       label: `api_token_${req.apiTokenCount + 1}_${req.user.id}`,
     });
 
-    await token._save(req.trx, false, req.user.id);
+    console.log(req.user.id);
+    await token._save(req.trx, req.user.id);
 
     let apiToken = new ApiToken({ user: req.user.id, token: token.id });
 
-    await apiToken._save(req.trx, false, req.user.id);
+    await apiToken._save(req.trx, req.user.id);
 
     res.status(200).json({ token: token.content });
   };
@@ -32,11 +33,12 @@ module.exports = (ctx) => {
   handler.validate = async (req, res, handler) => {
     await transaction.startTransaction(ctx.db.slonik, async (trx) => {
       req.trx = trx;
-      req.apiTokenCount = (await ApiToken.howManyByUser(trx, req.user.id)) + 1;
+      req.apiTokenCount =
+        (await ApiToken.countByColumn(trx, "user", req.user.id)) + 1;
 
-      if (req.apiTokenCount > ctx.apiToken.API_TOKEN_MAX_COUNT) {
+      if (req.apiTokenCount > ctx.limits.MAX_API_TOKENS_PER_USER) {
         res.status(403).json({
-          reason: `Maximum limit of ${ctx.apiToken.API_TOKEN_MAX_COUNT} api tokens reached"`,
+          reason: `Maximum limit of ${ctx.limits.MAX_API_TOKENS_PER_USER} api tokens reached"`,
         });
         return;
       }

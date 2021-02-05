@@ -10,6 +10,8 @@ const RoleModel = rfr("src/db/models/Role");
 const paths = [
   "POST:/otp/send",
   "POST:/otp/verify",
+  "GET:/user/phone",
+  "POST:/user/phone",
   "DELETE:/user/token/:id",
   "GET:/user/token",
   "POST:/user/token",
@@ -22,11 +24,23 @@ exports.up = async ({ slonik, sql }) =>
     await role._save(trx);
 
     let permissions = await trx.query(
-      sql`SELECT id FROM ${PermissionModel.getTableName()}
+      sql`SELECT path, id FROM ${PermissionModel.getTableName()}
           WHERE path = ANY(${sql.array(paths, "varchar")})`
     );
 
-    permissions = permissions.rows.map((x) => x.id);
+    let missingPermissions = paths;
+
+    permissions = permissions.rows.map((x) => {
+      if (missingPermissions.includes(x.path))
+        missingPermissions.splice(missingPermissions.indexOf(x.path), 1);
+
+      return x.id;
+    });
+
+    if (missingPermissions.length !== 0)
+      throw new Error(
+        `Missing permissions on database [${missingPermissions}]`
+      );
 
     let promises = [];
     for (let i in permissions) {

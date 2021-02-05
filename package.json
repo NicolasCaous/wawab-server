@@ -12,7 +12,7 @@
   "dependencies": {
     "@roarr/middleware-serialize-error": "^1.0.0",
     "@slonik/migrator": "^0.7.0",
-    "@slorm/slorm": "^0.0.6",
+    "@slorm/slorm": "^0.0.7",
     "app-root-path": "^3.0.0",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",

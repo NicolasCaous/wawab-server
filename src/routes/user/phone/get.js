@@ -1,17 +1,16 @@
 "use strict";
 const rfr = require("rfr");
 
-const TokenModel = rfr("src/db/models/Token");
+const PhoneModel = rfr("src/db/models/Phone");
 
 const { transaction } = require("@slorm/slorm");
 
-// TODO: get for another user as admin
 module.exports = (ctx) => {
   const handler = async (req, res) => {
     await transaction.startTransaction(ctx.db.slonik, async (trx) => {
-      let tokens = await TokenModel.listByUser(trx, req.user.id);
+      let phones = await PhoneModel.listByUser(trx, req.user.id);
 
-      res.status(200).json(tokens.map((x) => x.content));
+      res.status(200).json(phones.map((x) => x.content));
     });
   };
 
