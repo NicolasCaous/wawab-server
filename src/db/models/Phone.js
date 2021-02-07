@@ -5,7 +5,7 @@ const BaseModel = rfr("src/db/models/Base");
 const UserModel = rfr("src/db/models/User");
 
 const { sql } = require("slonik");
-const { ForeignKeyField, VarCharField } = require("@slorm/slorm");
+const { BooleanField, ForeignKeyField, VarCharField } = require("@slorm/slorm");
 
 class PhoneModel extends BaseModel {
   static tableName = sql`phone`;
@@ -16,6 +16,7 @@ class PhoneModel extends BaseModel {
   static auth_enc_key = new VarCharField();
   static auth_mac_key = new VarCharField();
 
+  static expired = new BooleanField();
   static image_url = new VarCharField();
   static jid = new VarCharField({ unique: true });
   static uname = new VarCharField();

@@ -10,6 +10,7 @@ const serverConfig = rfr("src/config/server");
 const errorHandler = rfr("src/error");
 const logger = rfr("src/logger")(__filename);
 const router = rfr("src/router");
+const WhatsAppManager = rfr("src/whatsapp/manager");
 
 const express = require("express");
 const { serializeError } = require("serialize-error");
@@ -30,6 +31,10 @@ module.exports = async () => {
     },
   };
 
+  ctx.whatsapp = {
+    manager: new WhatsAppManager(ctx),
+  };
+
   await setUpDatabase(ctx);
 
   const app = express();
@@ -42,7 +47,7 @@ module.exports = async () => {
     app.listen(serverConfig.PORT, () => {
       logger.info("Server started");
       logger.info(
-        `Example app listening at http://localhost:${serverConfig.PORT}`
+        `Server listening at http://localhost:${serverConfig.PORT}`
       );
     });
   };

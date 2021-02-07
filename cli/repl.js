@@ -47,3 +47,10 @@ for (let attr in require("@slorm/slorm")) {
 global.escape = require("@slorm/slorm").escape;
 global.joinSQLTemplates = require("@slorm/slorm").joinSQLTemplates;
 global.transaction = require("@slorm/slorm").transaction;
+
+fs.readdirSync(`${appRoot}/src/whatsapp`).forEach((file) => {
+  if (file.endsWith(".js")) {
+    let cls = rfr(`src/whatsapp/${file}`);
+    global[cls.name] = cls;
+  }
+});

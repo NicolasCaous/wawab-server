@@ -9,7 +9,32 @@ const { transaction } = require("@slorm/slorm");
 
 module.exports = (ctx) => {
   const handler = async (req, res) => {
-    res.status(200).json(req.user);
+    let phone = new PhoneModel({
+      auth_client_id: req.whatsAppCred.new_cred
+        ? req.whatsAppCred.new_cred.clientID
+        : req.body.clientID,
+      auth_server_token: req.whatsAppCred.new_cred
+        ? req.whatsAppCred.new_cred.serverToken
+        : req.body.serverToken,
+      auth_client_token: req.whatsAppCred.new_cred
+        ? req.whatsAppCred.new_cred.clientToken
+        : req.body.clientToken,
+      auth_enc_key: req.whatsAppCred.new_cred
+        ? req.whatsAppCred.new_cred.encKey
+        : req.body.encKey,
+      auth_mac_key: req.whatsAppCred.new_cred
+        ? req.whatsAppCred.new_cred.macKey
+        : req.body.macKey,
+      expired: false,
+      image_url: req.whatsAppCred.result.user.imgUrl,
+      jid: req.whatsAppCred.result.user.jid,
+      uname: req.whatsAppCred.result.user.name,
+      user: req.user.id,
+    });
+
+    await phone._save(req.trx, req.user.id);
+
+    res.status(200).json(req.whatsAppCred);
   };
 
   handler.fastValidate = async (req, res, next) => {
@@ -21,23 +46,51 @@ module.exports = (ctx) => {
     };
 
     // prettier-ignore
-    errors.auth_client_id = StringValidator(req.body.auth_client_id, rules);
+    errors.clientID = StringValidator(req.body.clientID, rules);
     // prettier-ignore
-    errors.auth_server_token = StringValidator(req.body.auth_server_token, rules);
+    errors.serverToken = StringValidator(req.body.serverToken, rules);
     // prettier-ignore
-    errors.auth_client_token = StringValidator(req.body.auth_client_token, rules);
+    errors.clientToken = StringValidator(req.body.clientToken, rules);
     // prettier-ignore
-    errors.auth_enc_key = StringValidator(req.body.auth_enc_key, rules);
+    errors.encKey = StringValidator(req.body.encKey, rules);
     // prettier-ignore
-    errors.auth_mac_key = StringValidator(req.body.auth_mac_key, rules);
+    errors.macKey = StringValidator(req.body.macKey, rules);
 
     for (let arg in errors) if (errors[arg].length === 0) delete errors[arg];
 
-    if (Object.keys(errors).length !== 0) res.status(400).json({ errors });
-    else await next();
+    if (Object.keys(errors).length !== 0) {
+      res.status(400).json({ errors });
+      return;
+    }
+
+    let dryrun = await ctx.whatsapp.manager.testCredential(
+      {
+        clientID: req.body.clientID,
+        serverToken: req.body.serverToken,
+        clientToken: req.body.clientToken,
+        encKey: req.body.encKey,
+        macKey: req.body.macKey,
+      },
+      true
+    );
+
+    if (dryrun.status !== "OK") {
+      res.status(400).json({ errors: [dryrun.status] });
+      return;
+    }
+
+    await next();
   };
 
   handler.validate = async (req, res, handler) => {
+    req.whatsAppCred = ctx.whatsapp.manager.testCredential({
+      clientID: req.body.clientID,
+      serverToken: req.body.serverToken,
+      clientToken: req.body.clientToken,
+      encKey: req.body.encKey,
+      macKey: req.body.macKey,
+    });
+
     await transaction.startTransaction(ctx.db.slonik, async (trx) => {
       req.trx = trx;
       req.phoneCount =
@@ -50,15 +103,37 @@ module.exports = (ctx) => {
         return;
       }
 
-      /*if (
-        (await PhoneModel.countByColumn(trx, "jid", `${req.body.number}@`)) !==
-        0
+      req.whatsAppCred = await req.whatsAppCred;
+
+      switch (req.whatsAppCred.status) {
+        case "TIMEOUT":
+          res.status(400).json({
+            reason: "Connection to WhatsApp Web API timed out",
+          });
+          return;
+        case "ERROR":
+          res.status(400).json({
+            reason:
+              "An error occured while openning a connection to WhatsApp Web API",
+            error: req.whatsAppCred.err,
+          });
+          return;
+      }
+
+      if (
+        (await PhoneModel.countByColumn(
+          trx,
+          "jid",
+          req.whatsAppCred.result.user.jid
+        )) !== 0
       ) {
         res.status(409).json({
-          reason: `Phone ${req.body.number} is already beeing used"`,
+          reason: `Phone "+${
+            req.whatsAppCred.result.user.jid.split("@")[0]
+          }" is already beeing used"`,
         });
         return;
-      }*/
+      }
 
       await handler(req, res);
     });

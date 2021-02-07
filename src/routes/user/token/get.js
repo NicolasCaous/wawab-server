@@ -1,7 +1,7 @@
 "use strict";
 const rfr = require("rfr");
 
-const TokenModel = rfr("src/db/models/Token");
+const ApiTokenModel = rfr("src/db/models/ApiToken");
 
 const { transaction } = require("@slorm/slorm");
 
@@ -9,9 +9,9 @@ const { transaction } = require("@slorm/slorm");
 module.exports = (ctx) => {
   const handler = async (req, res) => {
     await transaction.startTransaction(ctx.db.slonik, async (trx) => {
-      let tokens = await TokenModel.listByUser(trx, req.user.id);
+      let tokens = await ApiTokenModel.listByUser(trx, req.user.id);
 
-      res.status(200).json(tokens.map((x) => x.content));
+      res.status(200).json(tokens.map((x) => x.id));
     });
   };
 

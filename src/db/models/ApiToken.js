@@ -17,6 +17,16 @@ class ApiTokenModel extends BaseModel {
     unique: true,
   });
   static user = new ForeignKeyField({ table: UserModel, column: "id" });
+
+  static async listByUser(trx, user_id) {
+    let tokens = (
+      await trx.query(sql`SELECT at.* FROM ${this.getTableName()} at
+                            INNER JOIN "user" u ON at."user" = u."id"
+                          WHERE u."id" = ${user_id}`)
+    ).rows;
+
+    return tokens.map((x) => new this(x));
+  }
 }
 
 ApiTokenModel.setUpHistory();

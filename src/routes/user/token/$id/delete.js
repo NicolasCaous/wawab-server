@@ -21,28 +21,24 @@ module.exports = (ctx) => {
   handler.validate = async (req, res, handler) => {
     await transaction.startTransaction(ctx.db.slonik, async (trx) => {
       req.trx = trx;
-      req.token = await Token.getByColumn(trx, "content", req.params.id);
+      req.apiToken = await ApiToken.getById(trx, req.params.id);
 
-      if (req.token === undefined) {
-        res.status(404).json({ reason: `Token ${req.params.id} not found` });
+      if (req.apiToken === undefined) {
+        res.status(404).json({ reason: `ApiToken ${req.params.id} not found` });
         return;
       }
 
-      req.apiToken = await ApiToken.getByColumn(trx, "token", req.token.id);
-
-      console.log();
-
       if (req.apiToken.user !== req.user.id) {
         if (!req.userRoles.includes("admin")) {
-          res
-            .status(403)
-            .json({
-              reason:
-                "A user can't delete another user's token unless the user is an admin",
-            });
+          res.status(403).json({
+            reason:
+              "A user can't delete another user's token unless the user is an admin",
+          });
           return;
         }
       }
+
+      req.token = await Token.getById(trx, req.apiToken.token);
 
       await handler(req, res);
     });

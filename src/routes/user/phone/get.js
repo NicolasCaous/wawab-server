@@ -10,7 +10,7 @@ module.exports = (ctx) => {
     await transaction.startTransaction(ctx.db.slonik, async (trx) => {
       let phones = await PhoneModel.listByUser(trx, req.user.id);
 
-      res.status(200).json(phones.map((x) => x.content));
+      res.status(200).json(phones);
     });
   };
 
