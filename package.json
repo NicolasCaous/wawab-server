@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "prodstart": "node src/server.js | roarr pretty-print",
     "start": "nodemon src/server.js | roarr pretty-print",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@adiwajshing/baileys": "^3.4.1",
+    "@roarr/cli": "^3.2.2",
     "@roarr/middleware-serialize-error": "^1.0.0",
     "@slonik/migrator": "^0.7.0",
     "@slorm/slorm": "^0.0.8",

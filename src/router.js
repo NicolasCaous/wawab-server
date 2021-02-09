@@ -46,6 +46,8 @@ module.exports = async (ctx, app) => {
   // prettier-ignore
   app.post("/user/phone", setupRoute(standardMiddlewares, rfr(`${root}/user/phone/post`)));
   // prettier-ignore
+  app.put("/user/phone", setupRoute(standardMiddlewares, rfr(`${root}/user/phone/put`)));
+  // prettier-ignore
   app.delete("/user/token/:id", setupRoute(standardMiddlewares, rfr(`${root}/user/token/$id/delete`)));
   // prettier-ignore
   app.get("/user/token", setupRoute(standardMiddlewares, rfr(`${root}/user/token/get`)));

@@ -2,7 +2,6 @@
 const rfr = require("rfr");
 
 const { transaction } = require("@slorm/slorm");
-const { path } = require("app-root-path");
 
 const PermissionModel = rfr("src/db/models/Permission");
 const RolePermissionModel = rfr("src/db/models/RolePermission");
@@ -13,6 +12,7 @@ const paths = [
   "POST:/otp/verify",
   "GET:/user/phone",
   "POST:/user/phone",
+  "PUT:/user/phone",
   "DELETE:/user/token/:id",
   "GET:/user/token",
   "POST:/user/token",

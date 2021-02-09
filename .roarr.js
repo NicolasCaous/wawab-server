@@ -6,7 +6,7 @@ const ERROR = 50;
 const FATAL = 60;
 
 module.exports = {
-  filterFunction: (message) => {
+  "filter-function": (message) => {
     return message.context && message.context.logLevel >= INFO;
   },
 };

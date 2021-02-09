@@ -15,6 +15,7 @@ exports.up = async ({ slonik, sql }) =>
       "POST:/otp/verify",
       "GET:/user/phone",
       "POST:/user/phone",
+      "PUT:/user/phone",
       "DELETE:/user/token/:id",
       "GET:/user/token",
       "POST:/user/token",
